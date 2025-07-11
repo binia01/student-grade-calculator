@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"strconv"
 )
 
-func average(x map[string]int, y int) float64 {
-	ttl := 0
-	for _, score := range x {
-		ttl += score
+func average(grades map[string]int) float64 {
+	total := 0
+	for _, grade := range grades {
+		total += grade
 	}
-	return float64(ttl / y)
-
+	return float64(total) / float64(len(grades))
 }
 
 func main() {
@@ -23,35 +23,47 @@ func main() {
 	name, _ := reader.ReadString('\n')
 	name = strings.TrimSpace(name)
 
-	fmt.Print("Please enter number of grades: ")
+	fmt.Print("Please enter the number of subjects: ")
 	numStr, _ := reader.ReadString('\n')
 	numStr = strings.TrimSpace(numStr)
-	var num int
-	fmt.Sscanf(numStr, "%d", &num)
+	num, err := strconv.Atoi(numStr)
+	if err != nil || num <= 0 {
+		fmt.Println("Invalid number of subjects. Exiting...")
+		return
+	}
 
 	scores := make(map[string]int)
+
 	for i := 0; i < num; i++ {
-		fmt.Print("Please enter a subject: ")
+		fmt.Printf("\n Enter subject #%d name: ", i+1)
 		subject, _ := reader.ReadString('\n')
 		subject = strings.TrimSpace(subject)
 
-		fmt.Print("Enter corresponding score: ")
-		scoreStr, _ := reader.ReadString('\n')
-		scoreStr = strings.TrimSpace(scoreStr)
 		var score int
-		fmt.Sscanf(scoreStr, "%d", &score)
-		fmt.Println("Added!")
+		for {
+			fmt.Printf("Enter score for %s (0–100): ", subject)
+			scoreStr, _ := reader.ReadString('\n')
+			scoreStr = strings.TrimSpace(scoreStr)
+
+			s, err := strconv.Atoi(scoreStr)
+			if err != nil || s < 0 || s > 100 {
+				fmt.Println("Invalid score. Please enter a number between 0 and 100.")
+				continue
+			}
+			score = s
+			break
+		}
+
 		scores[subject] = score
+		fmt.Println("Grade added!")
 	}
 
-	grade_average := average(scores, num)
+	gradeAverage := average(scores)
 
-	fmt.Println("Student Grade")
-	fmt.Println("Name: ", name)
-	fmt.Println("These are the subjects and grades you have:")
+	fmt.Printf("Student Name: %s\n", name)
+	fmt.Println("Subject Grades:")
 	for subject, score := range scores {
-		fmt.Printf("%s: %d\n", subject, score)
+		fmt.Printf("  - %s: %d\n", subject, score)
 	}
-	fmt.Println("Total Grade Average: ", grade_average)
-
+	fmt.Printf("Total Average: %.2f\n", gradeAverage)
 }
